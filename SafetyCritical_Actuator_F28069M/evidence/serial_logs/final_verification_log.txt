@@ -1,0 +1,137 @@
+C2000 Safety-Critical Actuator Controller Final Verification Log
+Started: 2026-05-17T20:38:42
+Port: COM6
+Baud: 115200
+
+[20:38:42.806] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=8,LATCH=1
+[20:38:43.798] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=8,LATCH=1
+
+========================================================================
+[20:38:44.346] TX: RST,0
+NOTE: Reset to READY / safe output
+========================================================================
+[20:38:44.357] CMD=RST,0
+[20:38:44.359] STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=0,LATCH=0
+[20:38:44.791] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=0,LATCH=0
+[20:38:45.783] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=0,LATCH=0
+
+========================================================================
+[20:38:46.348] TX: EN,250,1
+NOTE: Run at 25% PWM; capture 25% duty
+========================================================================
+[20:38:46.357] CMD=EN,250,1
+[20:38:46.373] STATE=RUN,FAULT=NONE,EN=1,SP=250,PWM=25,AGE=0,SEQ=1,LATCH=0
+[20:38:46.790] HB STATE=RUN,FAULT=NONE,EN=1,SP=250,PWM=25,AGE=418,SEQ=1,LATCH=0
+[20:38:47.783] HB STATE=RUN,FAULT=NONE,EN=1,SP=250,PWM=25,AGE=1419,SEQ=1,LATCH=0
+
+========================================================================
+[20:38:48.352] TX: DIS,2
+NOTE: Disable after 25%; capture safe-low PWM
+========================================================================
+[20:38:48.357] CMD=DIS,2
+[20:38:48.374] STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=2,LATCH=0
+[20:38:48.774] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=2,LATCH=0
+[20:38:49.766] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=2,LATCH=0
+
+========================================================================
+[20:38:50.354] TX: EN,500,3
+NOTE: Run at 50% PWM; capture 50% duty
+========================================================================
+[20:38:50.373] CMD=EN,500,3
+[20:38:50.375] STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=0,SEQ=3,LATCH=0
+[20:38:50.773] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=395,SEQ=3,LATCH=0
+[20:38:51.766] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=1395,SEQ=3,LATCH=0
+
+========================================================================
+[20:38:52.358] TX: DIS,4
+NOTE: Disable after 50%; capture safe-low PWM
+========================================================================
+[20:38:52.373] CMD=DIS,4
+[20:38:52.376] STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=4,LATCH=0
+[20:38:52.759] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=4,LATCH=0
+[20:38:53.751] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=4,LATCH=0
+
+========================================================================
+[20:38:54.360] TX: EN,750,5
+NOTE: Run at 75% PWM; capture 75% duty
+========================================================================
+[20:38:54.373] CMD=EN,750,5
+[20:38:54.374] STATE=RUN,FAULT=NONE,EN=1,SP=750,PWM=75,AGE=0,SEQ=5,LATCH=0
+[20:38:54.743] HB STATE=RUN,FAULT=NONE,EN=1,SP=750,PWM=75,AGE=372,SEQ=5,LATCH=0
+[20:38:55.749] HB STATE=RUN,FAULT=NONE,EN=1,SP=750,PWM=75,AGE=1372,SEQ=5,LATCH=0
+
+========================================================================
+[20:38:56.361] TX: DIS,6
+NOTE: Disable after 75%; capture safe-low PWM
+========================================================================
+[20:38:56.373] CMD=DIS,6
+[20:38:56.375] STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=6,LATCH=0
+[20:38:56.742] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=6,LATCH=0
+[20:38:57.734] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=6,LATCH=0
+
+========================================================================
+[20:38:58.364] TX: EN,500,7
+NOTE: Run at 50% PWM before fault
+========================================================================
+[20:38:58.373] CMD=EN,500,7
+[20:38:58.389] STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=0,SEQ=7,LATCH=0
+[20:38:58.727] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=348,SEQ=7,LATCH=0
+[20:38:59.718] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=1348,SEQ=7,LATCH=0
+
+========================================================================
+[20:39:00.366] TX: FLT,8
+NOTE: Fault injection; capture fault safe-low
+========================================================================
+[20:39:00.373] CMD=FLT,8
+[20:39:00.390] STATE=FAULT_LATCHED,FAULT=SENSOR_FAULT,EN=0,SP=0,PWM=0,AGE=0,SEQ=8,LATCH=1
+[20:39:00.726] HB STATE=FAULT_LATCHED,FAULT=SENSOR_FAULT,EN=0,SP=0,PWM=0,AGE=0,SEQ=8,LATCH=1
+[20:39:01.719] HB STATE=FAULT_LATCHED,FAULT=SENSOR_FAULT,EN=0,SP=0,PWM=0,AGE=0,SEQ=8,LATCH=1
+
+========================================================================
+[20:39:02.370] TX: RST,9
+NOTE: Reset after fault
+========================================================================
+[20:39:02.373] CMD=RST,9
+[20:39:02.390] STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=9,LATCH=0
+[20:39:02.711] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=9,LATCH=0
+[20:39:03.703] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=9,LATCH=0
+
+========================================================================
+[20:39:04.371] TX: EN,1500,10
+NOTE: Invalid setpoint; capture latched fault / safe-low
+========================================================================
+[20:39:04.390] CMD=EN,1500,10
+[20:39:04.392] STATE=FAULT_LATCHED,FAULT=INVALID_SETPOINT,EN=0,SP=0,PWM=0,AGE=0,SEQ=10,LATCH=1
+[20:39:04.695] HB STATE=FAULT_LATCHED,FAULT=INVALID_SETPOINT,EN=0,SP=0,PWM=0,AGE=0,SEQ=10,LATCH=1
+[20:39:05.702] HB STATE=FAULT_LATCHED,FAULT=INVALID_SETPOINT,EN=0,SP=0,PWM=0,AGE=0,SEQ=10,LATCH=1
+
+========================================================================
+[20:39:06.374] TX: RST,11
+NOTE: Reset after invalid setpoint
+========================================================================
+[20:39:06.390] CMD=RST,11
+[20:39:06.392] STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=11,LATCH=0
+[20:39:06.694] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=11,LATCH=0
+[20:39:07.687] HB STATE=READY,FAULT=NONE,EN=0,SP=0,PWM=0,AGE=0,SEQ=11,LATCH=0
+
+========================================================================
+[20:39:08.376] TX: EN,500,12
+NOTE: Run at 50%, then wait for CPU Timer0 timeout
+========================================================================
+[20:39:08.389] CMD=EN,500,12
+[20:39:08.392] STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=0,SEQ=12,LATCH=0
+[20:39:08.679] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=287,SEQ=12,LATCH=0
+[20:39:09.671] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=1287,SEQ=12,LATCH=0
+[20:39:10.677] HB STATE=RUN,FAULT=NONE,EN=1,SP=500,PWM=50,AGE=2287,SEQ=12,LATCH=0
+[20:39:11.382] TIMEOUT
+[20:39:11.385] STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:11.671] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:12.662] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:13.656] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:14.647] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:15.654] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:16.647] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:17.640] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+[20:39:18.632] HB STATE=FAULT_LATCHED,FAULT=COMMS_TIMEOUT,EN=0,SP=0,PWM=0,AGE=3000,SEQ=12,LATCH=1
+
+Ended: 2026-05-17T20:39:19
