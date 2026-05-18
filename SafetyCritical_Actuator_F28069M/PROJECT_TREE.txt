@@ -1,0 +1,53 @@
+SafetyCritical_Actuator_F28069M/
+├── README.md
+├── README_UPLOAD.md
+├── PROJECT_TREE.txt
+├── docs/
+│   ├── 00_project_scope.md
+│   ├── 01_hardware_setup.md
+│   ├── 02_standards_mapping.md
+│   ├── 03_system_requirements.md
+│   ├── 04_software_requirements.md
+│   ├── 05_hazard_analysis.md
+│   ├── 06_architecture.md
+│   ├── 07_state_machine.md
+│   ├── 08_traceability_matrix.md
+│   ├── 09_verification_plan.md
+│   ├── 10_test_results.md
+│   ├── 11_release_checklist.md
+│   └── 12_evidence_capture_naming.md
+├── src/
+│   └── main.c
+├── tools/
+│   ├── clean_ccs_project.py
+│   ├── serial_auto_scope_demo.py
+│   ├── serial_monitor.py
+│   └── serial_terminal.py
+├── ccs_notes/
+│   └── build_notes.md
+└── evidence/
+    ├── evidence_index.md
+    ├── serial_logs/
+    │   ├── startup_log.txt
+    │   ├── sci_rx_echo_log.txt
+    │   ├── parser_state_machine_log.txt
+    │   ├── cpu_timer_timeout_log.txt
+    │   └── final_verification_log.txt
+    └── scope_captures/
+        ├── 00_rst_ready_safe_low.png
+        ├── 01_en250_pwm_25pct.png
+        ├── 02_dis_after_25_safe_low.png
+        ├── 03_en500_pwm_50pct.png
+        ├── 04_dis_after_50_safe_low.png
+        ├── 05_en750_pwm_75pct.png
+        ├── 05b_en750_pwm_75pct_alternate.png
+        ├── 06_dis_after_75_safe_low.png
+        ├── 07_en500_before_fault_pwm_50pct.png
+        ├── 08_flt_sensor_fault_safe_low.png
+        ├── 09_rst_after_fault_safe_low.png
+        ├── 10_en1500_invalid_setpoint_safe_low.png
+        ├── 11_rst_after_invalid_setpoint_safe_low.png
+        ├── 12_en500_before_timeout_pwm_50pct.png
+        ├── 13_cpu_timer_timeout_safe_low.png
+        ├── 14_final_verification_scope_and_serial.mp4
+        └── 15_cpu_timer_timeout_transition.mp4
