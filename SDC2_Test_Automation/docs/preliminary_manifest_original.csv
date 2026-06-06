@@ -1,9 +1,0 @@
-version,release_file,original_file,release_title,contents_summary
-v0.1,SDC2_Test_Automation_v0.1_AllTrials_Automated_Test_Environment.zip,01_SDC2_AllTrials_Automated_Test_Environment_v1_0.zip,All-Trials Automated Test Environment,Automated SDC2 all-trials code package for full test sequence execution and logging.
-v0.2,SDC2_Test_Automation_v0.2_Menu_Test_Package.zip,02_SDC2_Menu_Test_Package_v1_0.zip,Menu Test Package,Interactive menu-based SDC2 test runner package.
-v0.3,SDC2_Test_Automation_v0.3_OneClick_Baseline_ClosedLoop.zip,03_SDC2_OneClick_Baseline_ClosedLoop_v1_0.zip,One-Click Baseline Closed-Loop,One-click upload/run environment for baseline closed-loop testing.
-v0.4,SDC2_Test_Automation_v0.4_OneClick_Baseline_ClosedLoop_PathFix.zip,04_SDC2_OneClick_Baseline_ClosedLoop_PathFixed_v1_1.zip,One-Click Baseline Closed-Loop Path Fix,Corrected one-click baseline closed-loop package with path handling fix.
-v0.5,SDC2_Test_Automation_v0.5_OneClick_OpenLoop_Command_Test.zip,05_SDC2_OneClick_OpenLoop_Command_Test_v1_2.zip,One-Click Open-Loop Command Test,Open-loop command-frequency test package for direct STEP-rate behavior.
-v0.6,SDC2_Test_Automation_v0.6_OneClick_OpenLoop_Ramp_Test.zip,06_SDC2_OneClick_OpenLoop_Ramp_Test_v1_3.zip,One-Click Open-Loop Ramp Test,Open-loop ramp test package for gradual speed-command experiments.
-v0.7,SDC2_Test_Automation_v0.7_OneClick_SlowSpeed_Plot_Sweep.zip,07_SDC2_OneClick_SlowSpeed_Plot_Sweep_v1_4.zip,One-Click Slow-Speed Plot Sweep,Slow-speed sweep package for 0.002 to 0.1 deg/s characterization and plotting workflow.
-v0.8,SDC2_Test_Automation_v0.8_Debug_Integrated_Test_Environment.zip,08_SDC2_Debug_Integrated_Test_Environment_v2_0.zip,Debug Integrated Test Environment,Integrated debug/test environment with latest debugging options and analysis support.
