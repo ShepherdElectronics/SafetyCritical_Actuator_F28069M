@@ -1,0 +1,531 @@
+%% Plot_All_SDC2_Event_Timing_LegendOnly.m
+% SDC2 event-based encoder analysis.
+%
+% This version uses legends only:
+%   - No annotation boxes on the figures
+%   - Clean titles
+%   - Clean labels with units
+%   - Minor grids
+%   - Raw encoder-event calculations
+%   - No filtering, smoothing, or grouped averaging
+%
+% Input:
+%   SDC2_clean.csv
+%
+% Output folder:
+%   Boss_SDC2_Event_Analysis_LegendOnly/
+
+clear; clc; close all;
+
+%% ================= USER SETTINGS =================
+
+rawFile = "SDC2_clean.csv";
+
+CPR = 5000;
+edgeMult = 2;
+gearRatio = 24.65;
+
+degPerCount = 360 / (CPR * edgeMult * gearRatio);
+
+outputRoot = "Boss_SDC2_Event_Analysis_LegendOnly";
+if ~exist(outputRoot, 'dir')
+    mkdir(outputRoot);
+end
+
+speedRatioGoodLow  = 0.80;
+speedRatioGoodHigh = 1.20;
+
+dtRatioWarnHigh = 2.0;
+dtRatioWarnLow  = 0.5;
+
+minRowsPerSegment = 10;
+
+fprintf("\n===== SDC2 EVENT-BASED ENCODER ANALYSIS =====\n");
+fprintf("Method: raw encoder count events only; no filtering, smoothing, or grouped averaging.\n");
+fprintf("Encoder resolution = %.9f deg/count\n", degPerCount);
+
+%% ================= LOAD DATA =================
+
+if ~isfile(rawFile)
+    files = dir("SDC2*_raw*.csv");
+    if isempty(files)
+        error("Could not find SDC2_clean.csv or SDC2*_raw*.csv in this folder.");
+    end
+    [~, idxNewest] = max([files.datenum]);
+    rawFile = string(files(idxNewest).name);
+end
+
+fprintf("Reading file: %s\n", rawFile);
+T = readtable(rawFile);
+
+vars = string(T.Properties.VariableNames);
+
+timeCol   = findCol(vars, ["Time_s","Time"]);
+targetCol = findCol(vars, ["TargetSpeed_deg_s","TargetSpe","TargetSpeed"]);
+countCol  = findCol(vars, ["EncoderCount","Encoder"]);
+stateCol  = findColOptional(vars, ["State"]);
+faultCol  = findColOptional(vars, ["FaultCode","Fault"]);
+
+targetAll = T.(targetCol);
+speeds = unique(targetAll);
+speeds = speeds(~isnan(speeds));
+speeds = speeds(speeds > 0);
+
+fprintf("Target speed sections found:\n");
+disp(speeds');
+
+Summary = table();
+
+%% ================= ANALYZE EACH SPEED =================
+
+for s = reshape(speeds, 1, [])
+
+    idx = abs(targetAll - s) < 1e-12;
+
+    if nnz(idx) < minRowsPerSegment
+        continue;
+    end
+
+    S = T(idx,:);
+
+    tRaw = S.(timeCol);
+    cRaw = S.(countCol);
+
+    t = tRaw - tRaw(1);
+    c = cRaw;
+    cDelta = c - c(1);
+
+    duration = t(end) - t(1);
+    totalCountDelta = c(end) - c(1);
+
+    expectedCountsPerSec = abs(s) / degPerCount;
+    expectedDt = 1 / expectedCountsPerSec;
+    expectedCountDelta = expectedCountsPerSec * duration;
+
+    measuredCountsPerSec = abs(totalCountDelta) / duration;
+    measuredAverageSpeed = measuredCountsPerSec * degPerCount;
+    speedRatio = measuredAverageSpeed / abs(s);
+    countRatio = abs(totalCountDelta) / expectedCountDelta;
+
+    %% Event extraction from raw EncoderCount changes
+
+    dcSample = diff(c);
+    eventIdx = dcSample ~= 0;
+
+    eventTimes = t(2:end);
+    eventTimes = eventTimes(eventIdx);
+
+    eventCounts = c(2:end);
+    eventCounts = eventCounts(eventIdx);
+
+    if numel(eventTimes) >= 2
+        eventDt = diff(eventTimes);
+        eventCountJump = abs(diff(eventCounts));
+        eventSpeed = eventCountJump * degPerCount ./ eventDt;
+        eventTimes2 = eventTimes(2:end);
+
+        meanDt = mean(eventDt, "omitnan");
+        medianDt = median(eventDt, "omitnan");
+        stdDt = std(eventDt, "omitnan");
+        minDt = min(eventDt);
+        maxDt = max(eventDt);
+
+        meanEventSpeed = mean(eventSpeed, "omitnan");
+        medianEventSpeed = median(eventSpeed, "omitnan");
+        stdEventSpeed = std(eventSpeed, "omitnan");
+
+        highDtIdx = eventDt > dtRatioWarnHigh * expectedDt;
+        lowDtIdx  = eventDt < dtRatioWarnLow  * expectedDt;
+
+        badSpeedIdx = eventSpeed < speedRatioGoodLow * abs(s) | ...
+                      eventSpeed > speedRatioGoodHigh * abs(s);
+
+        numLongGaps = nnz(highDtIdx);
+        numShortGaps = nnz(lowDtIdx);
+        numBadSpeedEvents = nnz(badSpeedIdx);
+    else
+        eventDt = [];
+        eventSpeed = [];
+        eventTimes2 = [];
+
+        meanDt = NaN;
+        medianDt = NaN;
+        stdDt = NaN;
+        minDt = NaN;
+        maxDt = NaN;
+
+        meanEventSpeed = NaN;
+        medianEventSpeed = NaN;
+        stdEventSpeed = NaN;
+
+        highDtIdx = [];
+        lowDtIdx = [];
+        badSpeedIdx = [];
+
+        numLongGaps = NaN;
+        numShortGaps = NaN;
+        numBadSpeedEvents = NaN;
+    end
+
+    %% Fault and state text
+
+    if faultCol ~= ""
+        faults = unique(string(S.(faultCol)));
+        faults = faults(faults ~= "" & faults ~= "NONE");
+        if isempty(faults)
+            faultText = "NONE";
+        else
+            faultText = strjoin(faults, ", ");
+        end
+    else
+        faultText = "N/A";
+    end
+
+    if stateCol ~= ""
+        states = unique(string(S.(stateCol)));
+        stateText = strjoin(states, ", ");
+    else
+        stateText = "N/A";
+    end
+
+    %% Result classification
+
+    if speedRatio >= speedRatioGoodLow && speedRatio <= speedRatioGoodHigh
+        result = "GOOD";
+    elseif speedRatio < speedRatioGoodLow && speedRatio >= 0.40
+        result = "LOW";
+    elseif speedRatio < 0.40
+        result = "FAIL";
+    else
+        result = "HIGH";
+    end
+
+    if numLongGaps > 0
+        gapNote = sprintf("%d long-gap events > %.1fx expected interval", ...
+            numLongGaps, dtRatioWarnHigh);
+    else
+        gapNote = "No major long-gap events";
+    end
+
+    fprintf("\nTarget %.6f deg/s\n", s);
+    fprintf("  Duration: %.3f s\n", duration);
+    fprintf("  Count delta: %d counts; expected %.1f counts\n", ...
+        totalCountDelta, expectedCountDelta);
+    fprintf("  Measured average speed: %.6f deg/s; ratio %.3f\n", ...
+        measuredAverageSpeed, speedRatio);
+    fprintf("  Expected dt/event: %.4f s; median dt/event: %.4f s\n", ...
+        expectedDt, medianDt);
+    fprintf("  Result: %s\n", result);
+
+    %% ================= FIGURE =================
+
+    fig = figure( ...
+        'Name', sprintf('SDC2 Event Analysis %.6f deg/s', s), ...
+        'Color', 'w', ...
+        'Position', [100 60 1350 950]);
+
+    tiledlayout(3,1, 'TileSpacing','compact', 'Padding','compact');
+
+    %% Plot 1: Raw encoder count delta
+
+    nexttile;
+
+    idealCount = signOrOne(totalCountDelta) * expectedCountsPerSec * t;
+
+    plot(t, cDelta, '-o', ...
+        'MarkerSize', 3, ...
+        'LineWidth', 1.2, ...
+        'DisplayName', sprintf('Measured raw encoder count delta: %.0f counts', abs(totalCountDelta)));
+
+    hold on;
+
+    plot(t, idealCount, '--', ...
+        'LineWidth', 2.0, ...
+        'DisplayName', sprintf('Ideal count delta: %.1f counts', expectedCountDelta));
+
+    if speedRatio < speedRatioGoodLow
+        plot(t(end), cDelta(end), 'ro', ...
+            'MarkerSize', 8, ...
+            'LineWidth', 2, ...
+            'DisplayName', sprintf('Final lag: %.0f counts vs %.0f ideal', cDelta(end), idealCount(end)));
+    end
+
+    formatAxes();
+
+    xlabel('Segment time (s)');
+    ylabel('Encoder count delta (counts)');
+    title(sprintf('Raw Encoder Count Delta at %.6f deg/s', s), ...
+        'Interpreter','none');
+
+    legend('Location','northwest');
+
+    %% Plot 2: Time between encoder events
+
+    nexttile;
+
+    if ~isempty(eventTimes2)
+        plot(eventTimes2, eventDt, '-o', ...
+            'MarkerSize', 4, ...
+            'LineWidth', 1.2, ...
+            'DisplayName', 'Measured event interval');
+
+        hold on;
+
+        yline(expectedDt, '--', ...
+            sprintf('Expected interval: %.4f s/event', expectedDt), ...
+            'LineWidth', 2.0, ...
+            'DisplayName', sprintf('Expected interval: %.4f s/event', expectedDt));
+
+        yline(dtRatioWarnHigh * expectedDt, ':', ...
+            'LineWidth', 1.4, ...
+            'DisplayName', sprintf('Long-gap threshold: %.1fx expected', dtRatioWarnHigh));
+
+        yline(dtRatioWarnLow * expectedDt, ':', ...
+            'LineWidth', 1.4, ...
+            'DisplayName', sprintf('Short-gap threshold: %.1fx expected', dtRatioWarnLow));
+
+        if any(highDtIdx)
+            plot(eventTimes2(highDtIdx), eventDt(highDtIdx), 'ro', ...
+                'MarkerSize', 7, ...
+                'LineWidth', 1.5, ...
+                'DisplayName', sprintf('Long gaps: %d', numLongGaps));
+        end
+
+        if any(lowDtIdx)
+            plot(eventTimes2(lowDtIdx), eventDt(lowDtIdx), 'mo', ...
+                'MarkerSize', 7, ...
+                'LineWidth', 1.5, ...
+                'DisplayName', sprintf('Short gaps: %d', numShortGaps));
+        end
+
+        ylimTop = max([eventDt(:); dtRatioWarnHigh * expectedDt], [], 'omitnan') * 1.15;
+        ylim([0, ylimTop]);
+    else
+        text(0.1, 0.5, 'Not enough encoder events for timing analysis', ...
+            'Units','normalized', ...
+            'FontSize',12);
+    end
+
+    formatAxes();
+
+    xlabel('Segment time (s)');
+    ylabel('Time between count events (s/event)');
+    title('Encoder Event Timing');
+
+    legend('Location','northwest');
+
+    %% Plot 3: Raw event-to-event speed
+
+    nexttile;
+
+    if ~isempty(eventTimes2)
+        plot(eventTimes2, eventSpeed, '-o', ...
+            'MarkerSize', 4, ...
+            'LineWidth', 1.2, ...
+            'DisplayName', 'Raw event-to-event speed');
+
+        hold on;
+
+        yline(abs(s), '--', ...
+            'LineWidth', 2.0, ...
+            'DisplayName', sprintf('Target speed: %.6f deg/s', abs(s)));
+
+        yline(speedRatioGoodLow * abs(s), ':', ...
+            'LineWidth', 1.3, ...
+            'DisplayName', '80% target');
+
+        yline(speedRatioGoodHigh * abs(s), ':', ...
+            'LineWidth', 1.3, ...
+            'DisplayName', '120% target');
+
+        if any(badSpeedIdx)
+            plot(eventTimes2(badSpeedIdx), eventSpeed(badSpeedIdx), 'ro', ...
+                'MarkerSize', 6, ...
+                'LineWidth', 1.3, ...
+                'DisplayName', sprintf('Outside 80-120%% band: %d events', numBadSpeedEvents));
+        end
+
+        yTop = max([eventSpeed(:); abs(s) * 1.25], [], 'omitnan');
+        ylim([0, yTop * 1.15]);
+    else
+        text(0.1, 0.5, 'Not enough encoder events for speed analysis', ...
+            'Units','normalized', ...
+            'FontSize',12);
+    end
+
+    formatAxes();
+
+    xlabel('Segment time (s)');
+    ylabel('Event-based table speed (deg/s)');
+    title('Raw Event-to-Event Encoder Speed, No Filtering');
+
+    legend('Location','northwest');
+
+    %% Save individual speed figure
+
+    safeSpeed = replace(sprintf("%.6f", s), ".", "p");
+    figName = fullfile(outputRoot, sprintf("Event_LegendOnly_Target_%s_deg_s.png", safeSpeed));
+    saveas(fig, figName);
+
+    %% Save summary row
+
+    Summary = [Summary; table( ...
+        s, duration, totalCountDelta, expectedCountDelta, ...
+        measuredCountsPerSec, expectedCountsPerSec, ...
+        measuredAverageSpeed, speedRatio, countRatio, ...
+        expectedDt, meanDt, medianDt, stdDt, minDt, maxDt, ...
+        meanEventSpeed, medianEventSpeed, stdEventSpeed, ...
+        numLongGaps, numShortGaps, numBadSpeedEvents, ...
+        string(faultText), string(stateText), string(result), string(gapNote), ...
+        'VariableNames', { ...
+            'TargetSpeed_deg_s', ...
+            'Duration_s', ...
+            'MeasuredCountDelta', ...
+            'ExpectedCountDelta', ...
+            'MeasuredCountsPerSec', ...
+            'ExpectedCountsPerSec', ...
+            'MeasuredAverageSpeed_deg_s', ...
+            'MeasuredToTargetSpeedRatio', ...
+            'MeasuredToExpectedCountRatio', ...
+            'ExpectedSecondsPerEvent', ...
+            'MeanSecondsPerEvent', ...
+            'MedianSecondsPerEvent', ...
+            'StdSecondsPerEvent', ...
+            'MinSecondsPerEvent', ...
+            'MaxSecondsPerEvent', ...
+            'MeanEventSpeed_deg_s', ...
+            'MedianEventSpeed_deg_s', ...
+            'StdEventSpeed_deg_s', ...
+            'NumLongGapEvents', ...
+            'NumShortGapEvents', ...
+            'NumBadSpeedEvents', ...
+            'FaultsObserved', ...
+            'StatesObserved', ...
+            'Result', ...
+            'Notes' ...
+        })];
+
+end
+
+%% ================= COMBINED SUMMARY FIGURE =================
+
+summaryPath = fullfile(outputRoot, "SDC2_Event_Analysis_Summary.csv");
+writetable(Summary, summaryPath);
+
+disp(" ");
+disp("===== EVENT ANALYSIS SUMMARY =====");
+disp(Summary);
+
+fig = figure( ...
+    'Name','SDC2 Event Analysis Combined Summary', ...
+    'Color','w', ...
+    'Position',[150 100 1200 600]);
+
+tiledlayout(1,2, 'TileSpacing','compact', 'Padding','compact');
+
+nexttile;
+
+plot(Summary.TargetSpeed_deg_s, Summary.MeasuredAverageSpeed_deg_s, '-o', ...
+    'LineWidth', 2, ...
+    'MarkerSize', 7, ...
+    'DisplayName','Measured from raw encoder counts');
+
+hold on;
+
+plot(Summary.TargetSpeed_deg_s, Summary.TargetSpeed_deg_s, '--', ...
+    'LineWidth', 2, ...
+    'DisplayName','Ideal 1:1 tracking');
+
+formatAxes();
+
+xlabel('Target table speed (deg/s)');
+ylabel('Measured average table speed (deg/s)');
+title('Measured Average Speed vs Target Speed');
+
+legend('Location','northwest');
+
+nexttile;
+
+bar(categorical(string(Summary.TargetSpeed_deg_s)), ...
+    Summary.MeasuredToTargetSpeedRatio, ...
+    'DisplayName','Measured / target speed ratio');
+
+hold on;
+
+yline(1.0, '--', ...
+    'LineWidth', 2, ...
+    'DisplayName','Target ratio = 1.0');
+
+yline(speedRatioGoodLow, ':', ...
+    'LineWidth', 1.5, ...
+    'DisplayName','80% threshold');
+
+yline(speedRatioGoodHigh, ':', ...
+    'LineWidth', 1.5, ...
+    'DisplayName','120% threshold');
+
+formatAxes();
+
+xlabel('Target table speed (deg/s)');
+ylabel('Measured / target speed ratio');
+title('Speed Tracking Ratio by Test Section');
+
+legend('Location','northwest');
+
+summaryFigPath = fullfile(outputRoot, "SDC2_Event_Analysis_Combined_Summary.png");
+saveas(fig, summaryFigPath);
+
+fprintf("\nSaved all outputs in:\n");
+fprintf("  %s\n", fullfile(pwd, outputRoot));
+fprintf("\nFiles include:\n");
+fprintf("  SDC2_Event_Analysis_Summary.csv\n");
+fprintf("  SDC2_Event_Analysis_Combined_Summary.png\n");
+fprintf("  Event_LegendOnly_Target_*.png\n");
+
+%% ================= HELPER FUNCTIONS =================
+
+function colName = findCol(vars, candidates)
+    colName = findColOptional(vars, candidates);
+    if colName == ""
+        error("Could not find required column. Tried: %s", strjoin(candidates, ", "));
+    end
+end
+
+function colName = findColOptional(vars, candidates)
+    colName = "";
+
+    for c = candidates
+        idx = find(strcmpi(vars, c), 1);
+        if ~isempty(idx)
+            colName = vars(idx);
+            return;
+        end
+    end
+
+    for c = candidates
+        idx = find(startsWith(lower(vars), lower(c)), 1);
+        if ~isempty(idx)
+            colName = vars(idx);
+            return;
+        end
+    end
+end
+
+function y = signOrOne(x)
+    if x < 0
+        y = -1;
+    else
+        y = 1;
+    end
+end
+
+function formatAxes()
+    grid on;
+    ax = gca;
+    ax.XMinorGrid = 'on';
+    ax.YMinorGrid = 'on';
+    ax.GridAlpha = 0.28;
+    ax.MinorGridAlpha = 0.12;
+    ax.FontSize = 11;
+    ax.LineWidth = 1.0;
+end
