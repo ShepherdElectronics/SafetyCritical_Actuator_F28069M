@@ -1,4 +1,3 @@
-SafetyCritical_Actuator_F28069M/
 ├── README.md
 ├── README_UPLOAD.md
 ├── PROJECT_TREE.txt
