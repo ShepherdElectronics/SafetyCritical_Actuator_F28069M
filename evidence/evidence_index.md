@@ -74,7 +74,7 @@ Expected files:
 
 ## Review Note
 
-The firmware was corrected to require exact command grammar, remove CLR watchdog keepalive behavior, use a 100 ms timeout, and perform a bounded startup self-test. Existing 3000 ms timeout logs are retained as historical evidence only; new 100 ms hardware evidence is pending.
+The public package documents exact command grammar, a 100 ms timeout configuration, and a bounded startup self-test. Existing 3000 ms timeout logs are retained as historical evidence; new 100 ms hardware evidence remains a separate verification item.
 
 The numbered visual evidence follows the same order as the automated verification command sequence. The serial logs provide the command/telemetry record, while the PNG and MP4 files provide oscilloscope evidence that the ePWM1A/GPIO0 actuator-command output transitions correctly between commanded PWM and safe-low states.
 

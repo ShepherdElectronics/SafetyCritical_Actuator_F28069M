@@ -15,7 +15,7 @@
 
 ## Summary
 
-The existing package demonstrates PWM scaling, disable safe-low behavior, fault-latched safe-low behavior, invalid setpoint rejection, reset behavior, and a legacy 3000 ms timeout profile. The corrected 100 ms timeout, bounded self-test, and expanded malformed-command grammar require new hardware evidence.
+The existing package demonstrates PWM scaling, disable safe-low behavior, fault-latched safe-low behavior, invalid setpoint rejection, reset behavior, and a legacy 3000 ms timeout profile. The configured 100 ms timeout, bounded self-test, and expanded malformed-command grammar require new hardware evidence.
 
 Two final serial-only robustness logs should be added to close the remaining verification gaps:
 
