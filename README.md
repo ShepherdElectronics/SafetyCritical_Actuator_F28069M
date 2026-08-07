@@ -26,6 +26,7 @@ This project is **not certified** to DO-178C, ISO 26262, ARP4754, or ARP4761. It
 - Fault command latches fault and forces output safe-low
 - Invalid setpoint latches fault and forces output safe-low
 - Unknown/malformed command latches `UNKNOWN_COMMAND` and forces output safe-low
+- Duplicate or out-of-order sequence values latch `STALE_SEQUENCE` and force output safe-low. Accepted sequence values advance modulo 16 bits; a half-range or greater backward jump is rejected.
 - Bounded startup self-test checks initialized safe-state invariants and latches `SELF_TEST_FAILED` if they do not hold
 - CPU Timer0 communication timeout latches `COMMS_TIMEOUT` after 100 ms without a valid control command and forces output safe-low
 - Python serial tools for manual and automated verification

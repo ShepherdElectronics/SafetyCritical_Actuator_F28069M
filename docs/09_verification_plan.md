@@ -25,6 +25,7 @@
 | TEST-008 | Final integrated verification | Run full automated command sequence | All command, fault, PWM, reset, and timeout behaviors verified |
 | TEST-009 | Reset while enabled negative test | Send RST,0; EN,500,14; RST,15 | Reset while enabled does not bypass active safety behavior |
 | TEST-010 | Unknown/malformed command handling | Send FOO,123, EN,, EN,500, and DISASTER,1 | FAULT_LATCHED, FAULT=UNKNOWN_COMMAND, EN=0, SP=0, PWM=0, LATCH=1 |
+| TEST-011 | Sequence freshness | Repeat an accepted sequence and send a backward sequence while RUN is active | FAULT_LATCHED, FAULT=STALE_SEQUENCE, EN=0, SP=0, PWM=0, LATCH=1 |
 
 ## Additional Manual Serial Tests
 

@@ -20,6 +20,7 @@
 | SW-REQ-016 | Firmware shall report telemetry after each processed command. | serial logs |
 | SW-REQ-017 | Firmware shall report heartbeat telemetry once per second. | final log |
 | SW-REQ-018 | Firmware shall preserve the last accepted sequence number in telemetry. | final log |
+| SW-REQ-021 | Firmware shall reject duplicate and out-of-order sequence values, latch `STALE_SEQUENCE`, and force PWM safe-low. | sequence-replay test log |
 | SW-REQ-019 | Firmware shall reject unknown or malformed commands, including trailing garbage and incomplete fields, latch UNKNOWN_COMMAND, force PWM safe-low, and report fault telemetry. | `unknown_command_log.txt` |
 
 | SW-REQ-020 | Firmware shall perform a bounded startup self-test of controller invariants and initialized ePWM safe-low state before READY. | startup/self-test evidence |
