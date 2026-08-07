@@ -5,7 +5,7 @@
 | State | Meaning | PWM |
 |---|---|---|
 | INIT | Startup initialization | 0 |
-| SELF_TEST | Startup self-test placeholder | 0 |
+| SELF_TEST | Verify initialized controller invariants and ePWM safe-low state | 0 or FAULT_SELF_TEST_FAILED |
 | READY | Healthy, disabled, waiting for enable | 0 |
 | RUN | Enabled, valid command active | commanded |
 | FAULT_LATCHED | Fault latched, reset required | 0 |
@@ -16,6 +16,7 @@
 |---|---|---|---|
 | INIT | init complete | SELF_TEST | 0 |
 | SELF_TEST | pass | READY | 0 |
+| SELF_TEST | invariant failure | FAULT_LATCHED | 0 |
 | READY | valid EN | RUN | commanded |
 | RUN | DIS | READY | 0 |
 | RUN | FLT | FAULT_LATCHED | 0 |

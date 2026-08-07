@@ -23,7 +23,7 @@ Safety controller -> telemetry formatter -> SCI TX -> PC log
 | Component | Responsibility |
 |---|---|
 | SCI driver functions | Configure SCI-A, receive command bytes, transmit telemetry |
-| Command parser | Parse EN, DIS, RST, FLT, CLR command strings and reject malformed/unknown input |
+| Command parser | Parse exact EN, DIS, RST, and FLT command strings with complete token validation and reject malformed/unknown input |
 | Safety controller | Maintain state, fault, latch, setpoint, PWM percent, sequence, age |
 | PWM driver | Configure ePWM1A/GPIO0 and apply safe-low or commanded duty |
 | Timer0 ISR | Generate millisecond tick for timeout monitor |
@@ -32,4 +32,4 @@ Safety controller -> telemetry formatter -> SCI TX -> PC log
 
 ## Safety Architecture Rule
 
-The PWM driver does not decide whether output is safe. The safety controller decides the permitted PWM percent. Faults, disable, invalid commands, malformed commands, unknown commands, and timeout all route through `Controller_ForceSafeOutput()`.
+The bounded startup self-test checks controller invariants and the initialized ePWM safe-low state before READY. The PWM driver does not decide whether output is safe. The safety controller decides the permitted PWM percent. Faults, disable, invalid commands, malformed commands, unknown commands, and timeout all route through `Controller_ForceSafeOutput()`.

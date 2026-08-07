@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This project demonstrates a compact, hardware-backed safety-critical embedded-controls workflow on TI C2000 hardware.
+This project demonstrates a compact, hardware-backed standards-inspired embedded-controls workflow on TI C2000 hardware.
 
 The controller receives SCI/UART commands, validates command data, generates an ePWM actuator-command output, latches faults, rejects malformed commands, forces the output safe-low during disable/fault/invalid/timeout conditions, and reports telemetry for verification evidence.
 

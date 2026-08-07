@@ -10,7 +10,7 @@
 | SYS-REQ-006 | The system shall force the PWM output safe-low during fault-latched operation. | fault/invalid/timeout captures |
 | SYS-REQ-007 | The system shall reject invalid setpoints outside 0-1000. | `10_en1500_invalid_setpoint_safe_low.png` |
 | SYS-REQ-008 | The system shall latch safety faults until reset while disabled. | final verification log, `reset_while_enabled_log.txt` |
-| SYS-REQ-009 | The system shall detect stale command input using CPU Timer0 time. | timeout log/video/capture |
+| SYS-REQ-009 | The system shall detect stale command input using CPU Timer0 time and latch COMMS_TIMEOUT after 100 ms without a valid control command. | timeout log/video/capture |
 | SYS-REQ-010 | The system shall report state, fault, enable status, setpoint, PWM percent, age, sequence, and latch status. | serial logs |
 | SYS-REQ-011 | The system shall be testable on a low-power bench setup without a real actuator. | hardware setup and evidence |
 | SYS-REQ-012 | The system shall reject unknown or malformed serial commands without producing active actuator output. | `unknown_command_log.txt` |

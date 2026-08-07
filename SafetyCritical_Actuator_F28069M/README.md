@@ -16,14 +16,15 @@ This project is **not certified** to DO-178C, ISO 26262, ARP4754, or ARP4761. It
 - Fault codes: `NONE`, `INVALID_SETPOINT`, `SENSOR_FAULT`, `COMMS_TIMEOUT`, `SELF_TEST_FAILED`, `UNKNOWN_COMMAND`
 - ePWM1A / GPIO0 actuator-command output
 - Valid setpoint mapping:
-  - `EN,250` -> 25% PWM
-  - `EN,500` -> 50% PWM
-  - `EN,750` -> 75% PWM
+  - `EN,250,sequence` -> 25% PWM
+  - `EN,500,sequence` -> 50% PWM
+  - `EN,750,sequence` -> 75% PWM
 - Disable command forces output safe-low
 - Fault command latches fault and forces output safe-low
 - Invalid setpoint latches fault and forces output safe-low
 - Unknown/malformed command latches `UNKNOWN_COMMAND` and forces output safe-low
-- CPU Timer0 communication timeout latches `COMMS_TIMEOUT` and forces output safe-low
+- Bounded startup self-test checks initialized safe-state invariants and latches `SELF_TEST_FAILED` if they do not hold
+- CPU Timer0 communication timeout latches `COMMS_TIMEOUT` after 100 ms without a valid control command and forces output safe-low
 - Python serial tools for manual and automated verification
 - Documentation package: requirements, hazard analysis, architecture, state machine, traceability, verification plan, test results, release checklist, and evidence index
 
@@ -53,6 +54,9 @@ EN,500,14
 RST,15
 FOO,123
 EN,
+EN,500
+EN,500,1,extra
+DISASTER,1
 ```
 
 ## Evidence Summary

@@ -17,14 +17,14 @@
 |---|---|---|---|
 | TEST-001 | Startup safe state | Load/run firmware | READY, PWM=0 |
 | TEST-002 | SCI command handling | Send RST/EN/DIS/FLT | Commands parsed and telemetry updated |
-| TEST-003 | PWM scaling | Send EN,250 / EN,500 / EN,750 | 25/50/75% duty on GPIO0 |
+| TEST-003 | PWM scaling | Send EN,250,1 / EN,500,2 / EN,750,3 | 25/50/75% duty on GPIO0 |
 | TEST-004 | Disable safe-low | Send DIS after EN | PWM=0, state READY |
 | TEST-005 | Fault safe-low | Send FLT after EN | FAULT_LATCHED, SENSOR_FAULT, PWM=0 |
-| TEST-006 | Invalid setpoint | Send EN,1500 | FAULT_LATCHED, INVALID_SETPOINT, PWM=0 |
-| TEST-007 | CPU Timer0 timeout | Send EN,500 and stop commands | COMMS_TIMEOUT after 3000 ms, PWM=0 |
+| TEST-006 | Invalid setpoint | Send EN,1500,4 | FAULT_LATCHED, INVALID_SETPOINT, PWM=0 |
+| TEST-007 | CPU Timer0 timeout | Send EN,500,1 and stop valid commands | COMMS_TIMEOUT after 100 ms without a valid control command, PWM=0 |
 | TEST-008 | Final integrated verification | Run full automated command sequence | All command, fault, PWM, reset, and timeout behaviors verified |
 | TEST-009 | Reset while enabled negative test | Send RST,0; EN,500,14; RST,15 | Reset while enabled does not bypass active safety behavior |
-| TEST-010 | Unknown/malformed command handling | Send FOO,123 and/or EN, | FAULT_LATCHED, FAULT=UNKNOWN_COMMAND, EN=0, SP=0, PWM=0, LATCH=1 |
+| TEST-010 | Unknown/malformed command handling | Send FOO,123, EN,, EN,500, and DISASTER,1 | FAULT_LATCHED, FAULT=UNKNOWN_COMMAND, EN=0, SP=0, PWM=0, LATCH=1 |
 
 ## Additional Manual Serial Tests
 
@@ -60,7 +60,7 @@ EN,
 Expected:
 
 ```text
-STATE=FAULT_LATCHED,FAULT=UNKNOWN_COMMAND,EN=0,SP=0,PWM=0,LATCH=1
+STATE=FAULT_LATCHED,FAULT=UNKNOWN_COMMAND,EN=0,SP=0,PWM=0,LATCH=1 for each malformed input
 ```
 
 Save as:

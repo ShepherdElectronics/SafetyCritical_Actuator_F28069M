@@ -30,10 +30,10 @@
 | Fault latch | Complete |
 | Invalid setpoint rejection | Complete |
 | Unknown/malformed command rejection | Complete |
-| CPU Timer0 timeout | Complete |
+| CPU Timer0 timeout implementation | Complete; 100 ms hardware evidence pending |
 | Safe-low output forcing | Complete |
 | Telemetry | Complete |
-| Unused SAFE_SHUTDOWN state removed from documentation basis | Complete |
+| Unused SAFE_SHUTDOWN state removed from firmware and documentation basis | Complete |
 
 ## Evidence Checklist
 
@@ -48,7 +48,7 @@
 | Disable safe-low captures added | Complete |
 | Fault safe-low capture added | Complete |
 | Invalid setpoint safe-low capture added | Complete |
-| CPU Timer0 timeout evidence added | Complete |
+| CPU Timer0 timeout evidence added | Pending 100 ms recapture |
 | Final verification video added | Complete |
 | Timeout transition video added | Complete |
 | Reset while enabled negative-test log added | Pending |
@@ -56,13 +56,13 @@
 
 ## Release Decision
 
-**Release status: nearly complete for portfolio upload.**
+**Release status: implementation corrected; hardware verification remains open.**
 
-The main evidence package is complete. Add the two final serial-only robustness logs before marking the release fully closed:
+The existing evidence package contains a legacy 3000 ms timeout demonstration. Add a new 100 ms timeout capture/log, bounded self-test evidence, and the two final serial-only robustness logs before marking the corrected release fully closed:
 
 ```text
 evidence/serial_logs/reset_while_enabled_log.txt
 evidence/serial_logs/unknown_command_log.txt
 ```
 
-The project is ready to present as a standards-inspired safety-critical embedded controls demonstration once those two logs are added. It does not claim certification to DO-178C, ISO 26262, ARP4754, or ARP4761.
+The project is ready to present as a standards-inspired safety-oriented embedded-controls demonstration once those two logs are added. It does not claim certification to DO-178C, ISO 26262, ARP4754, or ARP4761.

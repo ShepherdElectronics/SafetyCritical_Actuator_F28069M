@@ -8,14 +8,14 @@
 | TEST-004 Disable safe-low | Pass | `02_dis_after_25_safe_low.png`, `04_dis_after_50_safe_low.png`, `06_dis_after_75_safe_low.png` |
 | TEST-005 Fault safe-low | Pass | `08_flt_sensor_fault_safe_low.png`, `final_verification_log.txt` |
 | TEST-006 Invalid setpoint safe-low | Pass | `10_en1500_invalid_setpoint_safe_low.png`, `final_verification_log.txt` |
-| TEST-007 CPU Timer0 timeout | Pass | `cpu_timer_timeout_log.txt`, `13_cpu_timer_timeout_safe_low.png`, `15_cpu_timer_timeout_transition.mp4` |
+| TEST-007 CPU Timer0 timeout | Pending 100 ms recapture | Existing evidence records the prior 3000 ms demonstration profile; new firmware requires 100 ms hardware evidence. |
 | TEST-008 Final verification sequence | Pass | `final_verification_log.txt`, `14_final_verification_scope_and_serial.mp4` |
 | TEST-009 Reset while enabled negative test | Pending log | `reset_while_enabled_log.txt` |
 | TEST-010 Unknown/malformed command handling | Pending log | `unknown_command_log.txt` |
 
 ## Summary
 
-The final verification package demonstrates valid PWM scaling, disable safe-low behavior, fault-latched safe-low behavior, invalid setpoint rejection, reset behavior, and CPU Timer0 communication timeout.
+The existing package demonstrates PWM scaling, disable safe-low behavior, fault-latched safe-low behavior, invalid setpoint rejection, reset behavior, and a legacy 3000 ms timeout profile. The corrected 100 ms timeout, bounded self-test, and expanded malformed-command grammar require new hardware evidence.
 
 Two final serial-only robustness logs should be added to close the remaining verification gaps:
 

@@ -15,14 +15,14 @@
 
 | Hazard ID | Hazard | Cause | Effect | Mitigation | Evidence |
 |---|---|---|---|---|---|
-| HAZ-001 | Stale command keeps output active | Host stops sending commands | Actuator command persists | CPU Timer0 command timeout | `13_cpu_timer_timeout_safe_low.png`, timeout video/log |
+| HAZ-001 | Stale command keeps output active | Host stops sending commands | Actuator command persists | CPU Timer0 timeout after 100 ms without a valid control command | `13_cpu_timer_timeout_safe_low.png`, timeout video/log |
 | HAZ-002 | Excessive output command | Invalid setpoint accepted | Excessive duty cycle | Range check and INVALID_SETPOINT fault | `10_en1500_invalid_setpoint_safe_low.png` |
 | HAZ-003 | Output active during disable | Disable not enforced | Unexpected output | Force safe-low on DIS | `02`, `04`, `06` disable captures |
 | HAZ-004 | Output active during fault | Fault does not control PWM | Unsafe output remains active | Fault-latched safe-low | `08_flt_sensor_fault_safe_low.png` |
 | HAZ-005 | Unexpected restart or reset bypass after fault | Reset command handled without safety conditions | Uncommanded reactivation or fault-clear while enabled | Reset only while disabled; reset while enabled does not bypass active safety behavior | `reset_while_enabled_log.txt`, final log |
 | HAZ-006 | Poor diagnosability | Missing state/fault data | Verification ambiguity | Structured telemetry | serial logs |
 | HAZ-007 | Unsafe startup | PWM active before initialization | Output active at boot | Startup safe-low | `00_rst_ready_safe_low.png` |
-| HAZ-008 | Malformed serial command causes undefined behavior | Unknown command, incomplete command, garbage input | Parser ambiguity or unintended output | Reject malformed/unknown command, latch UNKNOWN_COMMAND, force safe-low | `unknown_command_log.txt` |
+| HAZ-008 | Malformed serial command causes undefined behavior | Unknown command, incomplete command, trailing garbage, or unsupported keepalive input | Parser ambiguity, watchdog bypass, or unintended output | Exact grammar validation, reject malformed/unknown command, latch UNKNOWN_COMMAND, force safe-low | `unknown_command_log.txt` |
 
 ## Derived Safety Requirements
 

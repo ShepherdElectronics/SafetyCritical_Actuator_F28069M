@@ -6,6 +6,8 @@ This document defines the final evidence naming convention. Visual evidence is n
 
 ## Final Command Sequence
 
+The corrected firmware requires exact command grammar and uses a 100 ms communication timeout. Existing timeout media captured at 3000 ms remains historical evidence and must not be reused as proof of the corrected timeout.
+
 | Step | Command/Event | Evidence |
 |---:|---|---|
 | 00 | `RST,0` | `00_rst_ready_safe_low.png` |

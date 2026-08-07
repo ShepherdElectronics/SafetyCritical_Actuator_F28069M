@@ -37,12 +37,12 @@
 | Command/Event | Expected GPIO0/ePWM1A |
 |---|---|
 | Startup / READY | 0% / safe-low |
-| `EN,250` | 25% duty |
-| `EN,500` | 50% duty |
-| `EN,750` | 75% duty |
+| `EN,250,1` | 25% duty |
+| `EN,500,2` | 50% duty |
+| `EN,750,3` | 75% duty |
 | `DIS` | 0% / safe-low |
 | `FLT` | 0% / safe-low |
-| `EN,1500` | 0% / safe-low |
+| `EN,1500,4` | 0% / safe-low |
 | `FOO,123` or malformed command | 0% / safe-low |
 | CPU Timer0 timeout | 0% / safe-low |
 

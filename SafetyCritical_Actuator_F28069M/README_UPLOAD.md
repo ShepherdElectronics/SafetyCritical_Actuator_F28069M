@@ -6,7 +6,7 @@ Safety-Critical Actuator Command Controller - TI C2000 F28069M
 
 ## One-Line Description
 
-Built a TI C2000 safety-critical actuator command controller with SCI command input, ePWM actuator output, explicit state-machine control, invalid/malformed-command rejection, fault-latched safe shutdown, CPU Timer0 communication timeout, telemetry, requirements traceability, and serial/scope verification evidence.
+Built a TI C2000 safety-oriented actuator command controller with SCI command input, ePWM actuator output, explicit state-machine control, invalid/malformed-command rejection, fault-latched safe shutdown, CPU Timer0 communication timeout, telemetry, requirements traceability, and serial/scope verification evidence.
 
 ## Standards-Inspired Framing
 
