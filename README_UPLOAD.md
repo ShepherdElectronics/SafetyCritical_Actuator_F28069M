@@ -25,12 +25,13 @@ system definition -> requirements -> hazard analysis -> derived safety requireme
 
 ## What To Review
 
-- `src/main.c` - firmware implementation
+- `src/main.c` and `src/command_parser.c` - firmware and exact command grammar implementation
 - `docs/02_standards_mapping.md` - standards mapping
 - `docs/05_hazard_analysis.md` - hazards and mitigations
 - `docs/08_traceability_matrix.md` - requirements to evidence
 - `docs/10_test_results.md` - verification results
 - `docs/11_release_checklist.md` - release checklist
+- `tools/test_parser_contract.py` and `tools/test_parser_behavior.py` - parser verification
 - `evidence/evidence_index.md` - evidence map
 
 ## Evidence Note

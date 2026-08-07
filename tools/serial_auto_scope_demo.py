@@ -5,6 +5,9 @@ import time
 from pathlib import Path
 from datetime import datetime
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_LOG_PATH = REPO_ROOT / "evidence" / "serial_logs" / "final_verification_log.txt"
+
 DEFAULT_COMMANDS = [
     ("RST,0", 2.0, "Reset to READY / safe output"),
 
@@ -74,7 +77,7 @@ def main():
     parser.add_argument("--baud", type=int, default=115200)
     parser.add_argument(
         "--log",
-        default=r"C:\\Users\\Jonathan\\Documents\\MATLAB\\Course Developement\\c2b\\DMD\\SafetyCritical_Actuator_F28069M\\evidence\\serial_logs\\final_verification_log.txt",
+        default=DEFAULT_LOG_PATH,
         help="Path to output log file.",
     )
     parser.add_argument(

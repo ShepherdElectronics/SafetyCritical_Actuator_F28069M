@@ -1,5 +1,6 @@
 #include "F2806x_Device.h"
 #include "F2806x_Examples.h"
+#include "command_parser.h"
 
 #define RX_BUFFER_SIZE       64U
 #define SETPOINT_MIN         0
@@ -8,11 +9,10 @@
 #define EPWM_PERIOD_COUNTS   1000U
 
 /*
- * Demo timeout in real milliseconds.
- * Use 3000 ms for visible scope testing.
- * Later change to 100 ms for the final safety requirement.
+ * Final demonstrator timeout in real milliseconds.
+ * A valid control command must be received within this interval while RUN is active.
  */
-#define COMMS_TIMEOUT_MS     3000UL
+#define COMMS_TIMEOUT_MS     100UL
 
 typedef enum
 {
@@ -20,8 +20,7 @@ typedef enum
     STATE_SELF_TEST,
     STATE_READY,
     STATE_RUN,
-    STATE_FAULT_LATCHED,
-    STATE_SAFE_SHUTDOWN
+    STATE_FAULT_LATCHED
 } ControllerState_t;
 
 typedef enum
@@ -31,7 +30,8 @@ typedef enum
     FAULT_SENSOR_FAULT,
     FAULT_COMMS_TIMEOUT,
     FAULT_SELF_TEST_FAILED,
-    FAULT_UNKNOWN_COMMAND
+    FAULT_UNKNOWN_COMMAND,
+    FAULT_STALE_SEQUENCE
 } FaultCode_t;
 
 typedef struct
@@ -43,6 +43,8 @@ typedef struct
     int setpoint;
     unsigned int pwm_percent;
     unsigned int sequence;
+    unsigned int last_accepted_sequence;
+    unsigned int sequence_valid;
     unsigned long last_command_ms;
     unsigned long command_age_ms;
 } Controller_t;
@@ -69,12 +71,11 @@ static void Controller_ProcessLine(char *line);
 static void Controller_LatchFault(FaultCode_t fault);
 static void Controller_ForceSafeOutput(void);
 static void Controller_SendTelemetry(void);
-static void Controller_CheckTimeout(void);
 
-static int  starts_with(const char *s, const char *prefix);
-static int  parse_en_command(const char *line, int *setpoint, unsigned int *seq);
-static unsigned int parse_seq_after_comma(const char *line);
-static int  parse_int(const char *s);
+static void Controller_CheckTimeout(void);
+static int  Controller_RunSelfTest(void);
+static int  Controller_AcceptSequence(unsigned int sequence);
+
 static void tx_uint(unsigned int value);
 static void tx_ulong(unsigned long value);
 static void tx_int(int value);
@@ -110,10 +111,15 @@ void main(void)
 
     Safety_Timer0_Init();
 
-    Safety_SCIA_TxString("\r\nBOOT OK\r\n");
-    Safety_SCIA_TxString("COMMANDS: EN,500,1  DIS,2  RST,3  FLT,4  CLR,5\r\n");
-    Safety_SCIA_TxString("PWM OUT: ePWM1A / GPIO0\r\n");
-    Safety_SCIA_TxString("CPU TIMER0 TIMEOUT DEMO ENABLED\r\n");
+    Safety_SCIA_TxString("
+BOOT OK
+");
+    Safety_SCIA_TxString("COMMANDS: EN,500,1  DIS,2  RST,3  FLT,4
+");
+    Safety_SCIA_TxString("PWM OUT: ePWM1A / GPIO0
+");
+    Safety_SCIA_TxString("CPU TIMER0 TIMEOUT: 100 ms
+");
     Controller_SendTelemetry();
 
     for (;;)
@@ -130,7 +136,8 @@ void main(void)
 
                     Safety_SCIA_TxString("CMD=");
                     Safety_SCIA_TxString(rx_buffer);
-                    Safety_SCIA_TxString("\r\n");
+                    Safety_SCIA_TxString("
+");
 
                     Controller_ProcessLine(rx_buffer);
                     Controller_SendTelemetry();
@@ -149,7 +156,8 @@ void main(void)
                 {
                     rx_index = 0U;
                     Controller_LatchFault(FAULT_UNKNOWN_COMMAND);
-                    Safety_SCIA_TxString("RX_ERROR=BUFFER_OVERFLOW\r\n");
+                    Safety_SCIA_TxString("RX_ERROR=BUFFER_OVERFLOW
+");
                     Controller_SendTelemetry();
                 }
             }
@@ -214,6 +222,8 @@ static void Controller_Init(void)
     g_ctrl.setpoint = 0;
     g_ctrl.pwm_percent = 0U;
     g_ctrl.sequence = 0U;
+    g_ctrl.last_accepted_sequence = 0U;
+    g_ctrl.sequence_valid = 0U;
     g_ctrl.last_command_ms = g_ms_tick;
     g_ctrl.command_age_ms = 0UL;
 
@@ -221,27 +231,31 @@ static void Controller_Init(void)
 
     g_ctrl.state = STATE_SELF_TEST;
 
-    Controller_ForceSafeOutput();
+    if (!Controller_RunSelfTest())
+    {
+        Controller_LatchFault(FAULT_SELF_TEST_FAILED);
+        return;
+    }
 
     g_ctrl.state = STATE_READY;
 }
 
 static void Controller_ProcessLine(char *line)
 {
-    int setpoint = 0;
+    long setpoint = 0L;
     unsigned int seq = 0U;
 
-    /*
-     * Any received complete command refreshes command age.
-     */
-    g_ctrl.last_command_ms = g_ms_tick;
-    g_ctrl.command_age_ms = 0UL;
-
-    if (parse_en_command(line, &setpoint, &seq))
+    if (Controller_ParseEnableCommand(line, &setpoint, &seq))
     {
         g_ctrl.sequence = seq;
 
-        if ((setpoint < SETPOINT_MIN) || (setpoint > SETPOINT_MAX))
+        if (!Controller_AcceptSequence(seq))
+        {
+            Controller_LatchFault(FAULT_STALE_SEQUENCE);
+            return;
+        }
+
+        if ((setpoint < (long)SETPOINT_MIN) || (setpoint > (long)SETPOINT_MAX))
         {
             Controller_LatchFault(FAULT_INVALID_SETPOINT);
             return;
@@ -255,9 +269,11 @@ static void Controller_ProcessLine(char *line)
             return;
         }
 
+        g_ctrl.last_command_ms = g_ms_tick;
+        g_ctrl.command_age_ms = 0UL;
         g_ctrl.enabled = 1U;
-        g_ctrl.setpoint = setpoint;
-        g_ctrl.pwm_percent = (unsigned int)(setpoint / 10);
+        g_ctrl.setpoint = (int)setpoint;
+        g_ctrl.pwm_percent = Controller_SetpointToPwmPercent(setpoint);
         g_ctrl.fault = FAULT_NONE;
         g_ctrl.state = STATE_RUN;
 
@@ -265,9 +281,16 @@ static void Controller_ProcessLine(char *line)
         return;
     }
 
-    if (starts_with(line, "DIS"))
+    if (Controller_ParseSimpleCommand(line, "DIS", &seq))
     {
-        g_ctrl.sequence = parse_seq_after_comma(line);
+        g_ctrl.sequence = seq;
+        if (!Controller_AcceptSequence(seq))
+        {
+            Controller_LatchFault(FAULT_STALE_SEQUENCE);
+            return;
+        }
+        g_ctrl.last_command_ms = g_ms_tick;
+        g_ctrl.command_age_ms = 0UL;
         g_ctrl.enabled = 0U;
         g_ctrl.setpoint = 0;
         Controller_ForceSafeOutput();
@@ -285,17 +308,23 @@ static void Controller_ProcessLine(char *line)
         return;
     }
 
-    if (starts_with(line, "RST"))
+    if (Controller_ParseSimpleCommand(line, "RST", &seq))
     {
-        g_ctrl.sequence = parse_seq_after_comma(line);
+        g_ctrl.sequence = seq;
+
+        if (!Controller_AcceptSequence(seq))
+        {
+            Controller_LatchFault(FAULT_STALE_SEQUENCE);
+            return;
+        }
 
         if (!g_ctrl.enabled)
         {
+            g_ctrl.last_command_ms = g_ms_tick;
+            g_ctrl.command_age_ms = 0UL;
             g_ctrl.fault = FAULT_NONE;
             g_ctrl.fault_latched = 0U;
             g_ctrl.setpoint = 0;
-            g_ctrl.last_command_ms = g_ms_tick;
-            g_ctrl.command_age_ms = 0UL;
             Controller_ForceSafeOutput();
             g_ctrl.state = STATE_READY;
         }
@@ -303,21 +332,41 @@ static void Controller_ProcessLine(char *line)
         return;
     }
 
-    if (starts_with(line, "FLT"))
+    if (Controller_ParseSimpleCommand(line, "FLT", &seq))
     {
-        g_ctrl.sequence = parse_seq_after_comma(line);
+        g_ctrl.sequence = seq;
+        if (!Controller_AcceptSequence(seq))
+        {
+            Controller_LatchFault(FAULT_STALE_SEQUENCE);
+            return;
+        }
+        g_ctrl.last_command_ms = g_ms_tick;
+        g_ctrl.command_age_ms = 0UL;
         Controller_LatchFault(FAULT_SENSOR_FAULT);
         return;
     }
 
-    if (starts_with(line, "CLR"))
+    Controller_LatchFault(FAULT_UNKNOWN_COMMAND);
+}
+static int Controller_AcceptSequence(unsigned int sequence)
+{
+    unsigned int delta;
+
+    if (!g_ctrl.sequence_valid)
     {
-        g_ctrl.sequence = parse_seq_after_comma(line);
-        return;
+        g_ctrl.last_accepted_sequence = sequence;
+        g_ctrl.sequence_valid = 1U;
+        return 1;
     }
 
-    g_ctrl.sequence = parse_seq_after_comma(line);
-    Controller_LatchFault(FAULT_UNKNOWN_COMMAND);
+    delta = (unsigned int)(sequence - g_ctrl.last_accepted_sequence);
+    if ((delta == 0U) || (delta >= 32768U))
+    {
+        return 0;
+    }
+
+    g_ctrl.last_accepted_sequence = sequence;
+    return 1;
 }
 
 static void Controller_CheckTimeout(void)
@@ -329,7 +378,8 @@ static void Controller_CheckTimeout(void)
         if (g_ctrl.command_age_ms >= COMMS_TIMEOUT_MS)
         {
             Controller_LatchFault(FAULT_COMMS_TIMEOUT);
-            Safety_SCIA_TxString("TIMEOUT\r\n");
+            Safety_SCIA_TxString("TIMEOUT
+");
             Controller_SendTelemetry();
         }
     }
@@ -351,6 +401,23 @@ static void Controller_ForceSafeOutput(void)
     Actuator_PWM_SetPercent(0U);
 }
 
+static int Controller_RunSelfTest(void)
+{
+    if ((g_ctrl.enabled != 0U) || (g_ctrl.fault_latched != 0U) ||
+        (g_ctrl.setpoint != 0) || (g_ctrl.pwm_percent != 0U) ||
+        (g_ctrl.fault != FAULT_NONE))
+    {
+        return 0;
+    }
+
+    if ((EPwm1Regs.CMPA.half.CMPA != 0U) ||
+        (EPwm1Regs.AQCSFRC.bit.CSFA != 1U))
+    {
+        return 0;
+    }
+
+    return 1;
+}
 static void Controller_SendTelemetry(void)
 {
     Safety_SCIA_TxString("STATE=");
@@ -377,7 +444,8 @@ static void Controller_SendTelemetry(void)
     Safety_SCIA_TxString(",LATCH=");
     tx_uint(g_ctrl.fault_latched);
 
-    Safety_SCIA_TxString("\r\n");
+    Safety_SCIA_TxString("
+");
 }
 
 static void Actuator_PWM_GpioInit(void)
@@ -515,92 +583,6 @@ static char Safety_SCIA_RxChar(void)
     return (char)(SciaRegs.SCIRXBUF.all & 0x00FF);
 }
 
-static int starts_with(const char *s, const char *prefix)
-{
-    while (*prefix != '\0')
-    {
-        if (*s != *prefix)
-        {
-            return 0;
-        }
-
-        s++;
-        prefix++;
-    }
-
-    return 1;
-}
-
-static int parse_en_command(const char *line, int *setpoint, unsigned int *seq)
-{
-    const char *p;
-    const char *q;
-
-    if (!starts_with(line, "EN,"))
-    {
-        return 0;
-    }
-
-    p = line + 3;
-
-    *setpoint = parse_int(p);
-
-    q = p;
-    while ((*q != '\0') && (*q != ','))
-    {
-        q++;
-    }
-
-    if (*q != ',')
-    {
-        *seq = 0U;
-        return 1;
-    }
-
-    q++;
-    *seq = (unsigned int)parse_int(q);
-
-    return 1;
-}
-
-static unsigned int parse_seq_after_comma(const char *line)
-{
-    const char *p = line;
-
-    while ((*p != '\0') && (*p != ','))
-    {
-        p++;
-    }
-
-    if (*p == ',')
-    {
-        p++;
-        return (unsigned int)parse_int(p);
-    }
-
-    return 0U;
-}
-
-static int parse_int(const char *s)
-{
-    int value = 0;
-    int sign = 1;
-
-    if (*s == '-')
-    {
-        sign = -1;
-        s++;
-    }
-
-    while ((*s >= '0') && (*s <= '9'))
-    {
-        value = (value * 10) + ((int)(*s - '0'));
-        s++;
-    }
-
-    return value * sign;
-}
-
 static void tx_uint(unsigned int value)
 {
     tx_ulong((unsigned long)value);
@@ -663,8 +645,6 @@ static const char* state_name(ControllerState_t state)
         case STATE_FAULT_LATCHED:
             return "FAULT_LATCHED";
 
-        case STATE_SAFE_SHUTDOWN:
-            return "SAFE_SHUTDOWN";
 
         default:
             return "UNKNOWN_STATE";
@@ -692,6 +672,8 @@ static const char* fault_name(FaultCode_t fault)
 
         case FAULT_UNKNOWN_COMMAND:
             return "UNKNOWN_COMMAND";
+        case FAULT_STALE_SEQUENCE:
+            return "STALE_SEQUENCE";
 
         default:
             return "UNKNOWN_FAULT";

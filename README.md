@@ -13,7 +13,7 @@ This project is **not certified** to DO-178C, ISO 26262, ARP4754, or ARP4761. It
 - SCI/UART command input
 - Serial telemetry output
 - Explicit states: `INIT`, `SELF_TEST`, `READY`, `RUN`, `FAULT_LATCHED`
-- Fault codes: `NONE`, `INVALID_SETPOINT`, `SENSOR_FAULT`, `COMMS_TIMEOUT`, `SELF_TEST_FAILED`, `UNKNOWN_COMMAND`
+- Fault codes: `NONE`, `INVALID_SETPOINT`, `SENSOR_FAULT`, `COMMS_TIMEOUT`, `SELF_TEST_FAILED`, `UNKNOWN_COMMAND`, `STALE_SEQUENCE`
 - ePWM1A / GPIO0 actuator-command output
 - Valid setpoint mapping: every integer setpoint from 0 through 1000 is valid. The firmware quantizes by integer division (`PWM=setpoint/10`) to whole-percent output.
   - `EN,250,sequence` -> 25% PWM
@@ -25,7 +25,8 @@ This project is **not certified** to DO-178C, ISO 26262, ARP4754, or ARP4761. It
 - Disable command forces output safe-low
 - Fault command latches fault and forces output safe-low
 - Invalid setpoint latches fault and forces output safe-low
-- Unknown/malformed command latches `UNKNOWN_COMMAND` and forces output safe-low
+- Exact command grammar rejects missing fields, trailing data, overflow, and prefix collisions; malformed input latches `UNKNOWN_COMMAND` and forces output safe-low
+- Duplicate or out-of-order sequence values latch `STALE_SEQUENCE` and force output safe-low
 - Bounded startup self-test checks initialized safe-state invariants and latches `SELF_TEST_FAILED` if they do not hold
 - CPU Timer0 communication timeout latches `COMMS_TIMEOUT` after 100 ms without a valid control command and forces output safe-low
 - Python serial tools for manual and automated verification
@@ -47,7 +48,10 @@ RST,9
 EN,1500,10
 RST,11
 EN,500,12
+EN,500,14
 ```
+
+Malformed-command examples that must be rejected include `EN,`, `EN,500`, `EN,500,1,extra`, `EN,500,1x`, and `DISASTER,1`. The communication watchdog is refreshed only after an accepted command; `CLR` is not a valid command.
 
 
 ## Evidence Summary

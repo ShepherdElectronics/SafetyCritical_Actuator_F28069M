@@ -20,6 +20,6 @@
 | SW-REQ-016 | HAZ-006 | `Controller_SendTelemetry()` | serial logs | Pass |
 | SW-REQ-017 | HAZ-006 | one-second heartbeat | final log | Pass |
 | SW-REQ-018 | HAZ-006 | `sequence` telemetry | final log | Pass |
-| SW-REQ-019 | HAZ-008 | exact parser rejection path | `unknown_command_log.txt` | Pending additional log |
+| SW-REQ-021 | HAZ-006 | Controller_AcceptSequence() and FAULT_STALE_SEQUENCE | sequence-replay test log | Pending hardware evidence |`r`n| SW-REQ-019 | HAZ-008 | exact parser rejection path | `unknown_command_log.txt` | Pending additional log |
 
 | SW-REQ-020 | HAZ-007 | Controller_RunSelfTest() | startup/self-test evidence | Pending hardware evidence |

@@ -29,7 +29,7 @@
 | ePWM1A output | Complete |
 | Fault latch | Complete |
 | Invalid setpoint rejection | Complete |
-| Unknown/malformed command rejection | Complete |
+| Unknown/malformed command rejection | Complete |`r`n| Sequence freshness enforcement | Complete; hardware replay evidence pending |
 | CPU Timer0 timeout implementation | Complete; 100 ms hardware evidence pending |
 | Safe-low output forcing | Complete |
 | Telemetry | Complete |
