@@ -15,10 +15,13 @@ This project is **not certified** to DO-178C, ISO 26262, ARP4754, or ARP4761. It
 - Explicit states: `INIT`, `SELF_TEST`, `READY`, `RUN`, `FAULT_LATCHED`
 - Fault codes: `NONE`, `INVALID_SETPOINT`, `SENSOR_FAULT`, `COMMS_TIMEOUT`, `SELF_TEST_FAILED`, `UNKNOWN_COMMAND`
 - ePWM1A / GPIO0 actuator-command output
-- Valid setpoint mapping:
+- Valid setpoint mapping: every integer setpoint from 0 through 1000 is valid. The firmware quantizes by integer division (`PWM=setpoint/10`) to whole-percent output.
   - `EN,250,sequence` -> 25% PWM
   - `EN,500,sequence` -> 50% PWM
   - `EN,750,sequence` -> 75% PWM
+  - `EN,1,sequence` through `EN,9,sequence` -> valid `RUN` with 0% PWM
+  - `EN,0,sequence` -> valid `RUN` with explicitly safe-low 0% PWM
+  `RUN` means an accepted enabled command, not necessarily a nonzero waveform.
 - Disable command forces output safe-low
 - Fault command latches fault and forces output safe-low
 - Invalid setpoint latches fault and forces output safe-low
