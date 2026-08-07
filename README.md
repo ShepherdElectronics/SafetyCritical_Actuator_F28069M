@@ -8,10 +8,6 @@ The firmware receives SCI/UART commands, executes an explicit safety state machi
 
 This project is **not certified** to DO-178C, ISO 26262, ARP4754, or ARP4761. It is **standards-inspired**: it borrows the lifecycle structure, traceability discipline, safety-analysis mindset, and evidence orientation from those standards and applies them to a compact embedded-controls demonstrator.
 
-## Project History and Public Release
-
-Portfolio records place the engineering work in April 2026. The public repository was assembled beginning May 18–19, 2026, and received additional release cleanup, parser hardening, sequence-freshness enforcement and verification work in August 2026. This is a curated public release, not a frozen April snapshot; see [docs/project-history.md](docs/project-history.md) for the timeline and evidence boundary.
-
 ## Implemented Behaviors
 
 - SCI/UART command input
