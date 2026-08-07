@@ -5,7 +5,7 @@
 | SW-REQ-001 | HAZ-007 | init sequence in `main()` | `startup_log.txt` | Pass |
 | SW-REQ-002 | HAZ-007 | `Controller_ForceSafeOutput()` | `00_rst_ready_safe_low.png` | Pass |
 | SW-REQ-003 | HAZ-003/004 | enum states and transitions | `final_verification_log.txt` | Pass |
-| SW-REQ-004 | HAZ-005/008 | exact `parse_en_command()` grammar and numeric conversion | parser and malformed-command evidence | Pending hardware evidence |
+| SW-REQ-004 | HAZ-005/008 | exact `Controller_ParseEnableCommand()` grammar and numeric conversion | parser and malformed-command evidence | Pending hardware evidence |
 | SW-REQ-005 | HAZ-003 | DIS branch | `02`, `04`, `06` safe-low captures | Pass |
 | SW-REQ-006 | HAZ-005 | RST branch | final log, `09`, `11` reset captures, `reset_while_enabled_log.txt` | Pending additional log |
 | SW-REQ-007 | HAZ-004 | FLT branch | final log, `08_flt_sensor_fault_safe_low.png` | Pass |
