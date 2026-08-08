@@ -6,7 +6,7 @@ This document defines the final evidence naming convention. Visual evidence is n
 
 ## Final Command Sequence
 
-The corrected firmware requires exact command grammar and uses a 100 ms communication timeout. Existing timeout media captured at 3000 ms remains historical evidence and must not be reused as proof of the corrected timeout.
+The firmware requires exact command grammar and uses a 100 ms communication timeout. Capture timeout evidence at the specified 100 ms threshold.
 
 | Step | Command/Event | Evidence |
 |---:|---|---|

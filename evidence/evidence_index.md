@@ -15,7 +15,6 @@ Expected files:
 - `startup_log.txt`
 - `sci_rx_echo_log.txt`
 - `parser_state_machine_log.txt`
-- `cpu_timer_timeout_log.txt`
 - `final_verification_log.txt`
 - `reset_while_enabled_log.txt`
 - `unknown_command_log.txt`
@@ -44,9 +43,7 @@ Expected files:
 - `10_en1500_invalid_setpoint_safe_low.png`
 - `11_rst_after_invalid_setpoint_safe_low.png`
 - `12_en500_before_timeout_pwm_50pct.png`
-- `13_cpu_timer_timeout_safe_low.png`
 - `14_final_verification_scope_and_serial.mp4`
-- `15_cpu_timer_timeout_transition.mp4`
 
 ## Evidence Coverage
 
@@ -67,14 +64,14 @@ Expected files:
 | Invalid setpoint safe-low | `10_en1500_invalid_setpoint_safe_low.png` |
 | Reset after invalid setpoint | `11_rst_after_invalid_setpoint_safe_low.png` |
 | Active PWM before timeout | `12_en500_before_timeout_pwm_50pct.png` |
-| CPU Timer0 timeout safe-low | `cpu_timer_timeout_log.txt`, `13_cpu_timer_timeout_safe_low.png`, `15_cpu_timer_timeout_transition.mp4` |
+| CPU Timer0 timeout safe-low | 100 ms timeout evidence pending |
 | Reset while enabled negative test | `reset_while_enabled_log.txt` |
 | Unknown/malformed command handling | `unknown_command_log.txt` |
 | Final integrated sequence | `final_verification_log.txt`, `14_final_verification_scope_and_serial.mp4` |
 
 ## Review Note
 
-The public package documents exact command grammar, a 100 ms timeout configuration, and a bounded startup self-test. Existing 3000 ms timeout logs are retained as historical evidence; new 100 ms hardware evidence remains a separate verification item.
+The public package documents exact command grammar, a 100 ms timeout configuration, and a bounded startup self-test. Hardware evidence for the 100 ms timeout remains a separate verification item.
 
 The numbered visual evidence follows the same order as the automated verification command sequence. The serial logs provide the command/telemetry record, while the PNG and MP4 files provide oscilloscope evidence that the ePWM1A/GPIO0 actuator-command output transitions correctly between commanded PWM and safe-low states.
 

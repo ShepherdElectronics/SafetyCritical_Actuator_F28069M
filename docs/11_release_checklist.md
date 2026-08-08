@@ -56,9 +56,9 @@
 
 ## Release Decision
 
-**Release status: implementation corrected; hardware verification remains open.**
+**Release status: implementation complete; hardware verification remains open.**
 
-The existing evidence package contains a legacy 3000 ms timeout demonstration. Add a new 100 ms timeout capture/log, bounded self-test evidence, and the two final serial-only robustness logs before marking the public release fully closed:
+Add a 100 ms timeout capture/log, bounded self-test evidence, and the two final serial-only robustness logs before marking the public release fully closed:
 
 ```text
 evidence/serial_logs/reset_while_enabled_log.txt
